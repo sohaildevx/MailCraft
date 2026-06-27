@@ -14,7 +14,7 @@ const Navbar = () => {
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
-    <nav aria-label="Main navigation" className="w-full relative">
+    <nav aria-label="Main navigation" className="w-full sticky top-0 z-50 bg-[#0c0c0a]/80 backdrop-blur-md">
       <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20 border-b border-white/10">
         <a href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
           <span className="flex items-center justify-center rounded-md bg-[#E8FF4D] p-1.5">

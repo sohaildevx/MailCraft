@@ -3,15 +3,15 @@
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardFooter } from "../components/ui/card";
 
-const stats = [
-  { value: "12,400+", label: "EMAILS GENERATED" },
-  { value: "94%", label: "RESPONSE RATE LIFT" },
-  { value: "< 3s", label: "AVG. GEN. TIME" },
-];
+// const stats = [
+//   { value: "12,400+", label: "EMAILS GENERATED" },
+//   { value: "94%", label: "RESPONSE RATE LIFT" },
+//   { value: "< 3s", label: "AVG. GEN. TIME" },
+// ];
 
 const Hero = () => {
   return (
-    <section className="px-6 py-16 md:px-12 lg:px-20 md:py-24">
+    <section className="px-6 py-16 md:px-12 lg:px-20 md:py-24 border-b border-white/10">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-12 items-center">
         
         <div className="md:col-span-3 flex flex-col gap-8">
@@ -47,7 +47,7 @@ const Hero = () => {
             </Button>
           </div>
 
-          <div className="flex items-center gap-10 pt-4">
+          {/* <div className="flex items-center gap-10 pt-4">
             {stats.map((stat) => (
               <div key={stat.label} className="flex flex-col">
                 <span className="text-xl md:text-2xl font-bold text-[#E8FF4D]">
@@ -58,7 +58,7 @@ const Hero = () => {
                 </span>
               </div>
             ))}
-          </div>
+          </div> */}
         </div>
 
        
