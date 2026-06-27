@@ -1,22 +1,90 @@
+"use client";
+
+import { useState } from "react";
 import { Button } from "../components/ui/button";
 
+const navLinks = [
+  { label: "FEATURES", href: "#features" },
+  { label: "HOW IT WORKS", href: "#how-it-works" },
+  { label: "PRICING", href: "#pricing" },
+  { label: "TESTIMONIALS", href: "#testimonials" },
+];
+
 const Navbar = () => {
+  const [menuOpen, setMenuOpen] = useState(false);
+
   return (
-    <nav aria-label="Main navigation" className="w-full">
-      <div className="flex items-center justify-between px-12 py-4 md:px-12 lg:px-20">
-        <a href="/" className="text-xl font-bold tracking-tight text-white transition-opacity hover:opacity-80">
-          MailCraft
+    <nav aria-label="Main navigation" className="w-full relative">
+      <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20 border-b border-white/10">
+        <a href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+          <span className="flex items-center justify-center rounded-md bg-[#E8FF4D] p-1.5">
+            <img src="/logo/logo.svg" alt="MailCraft logo" width={28} height={28} />
+          </span>
+          <span className="text-sm md:text-xl font-bold tracking-tight text-white">
+            MAILCRAFT
+          </span>
         </a>
 
+        <div className="hidden md:flex items-center gap-8">
+          {navLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+
+        
         <div className="flex items-center gap-3">
-          <Button variant="ghost" size="sm" className="text-white hover:bg-white/10 hover:text-white text-xl">
-            Login
+          <Button
+            size="sm"
+            className="bg-[#E8FF4D] text-black font-semibold hover:bg-[#d4eb44] text-sm md:text-base cursor-pointer p-3 md:p-5"
+          >
+            TRY FREE
           </Button>
-          <Button size="sm" className="bg-white text-black font-semibold hover:bg-white/90 text-xl cursor-pointer">
-            Get started
-          </Button>
+
+
+          <button
+            className="md:hidden flex flex-col justify-center items-center w-8 h-8 gap-1.5"
+            onClick={() => setMenuOpen(!menuOpen)}
+            aria-label={menuOpen ? "Close menu" : "Open menu"}
+          >
+            <span
+              className={`block w-5 h-0.5 bg-white transition-transform duration-200 ${
+                menuOpen ? "translate-y-2 rotate-45" : ""
+              }`}
+            />
+            <span
+              className={`block w-5 h-0.5 bg-white transition-opacity duration-200 ${
+                menuOpen ? "opacity-0" : ""
+              }`}
+            />
+            <span
+              className={`block w-5 h-0.5 bg-white transition-transform duration-200 ${
+                menuOpen ? "-translate-y-2 -rotate-45" : ""
+              }`}
+            />
+          </button>
         </div>
       </div>
+
+      {menuOpen && (
+        <div className="md:hidden absolute top-full left-0 w-full bg-[#1a1a16] border-t border-[#2a2a24] px-6 py-6 flex flex-col gap-5">
+          {navLinks.map((link) => (
+            <a
+              key={link.label}
+              href={link.href}
+              className="text-sm font-medium text-gray-400 hover:text-white transition-colors"
+              onClick={() => setMenuOpen(false)}
+            >
+              {link.label}
+            </a>
+          ))}
+        </div>
+      )}
     </nav>
   );
 };
