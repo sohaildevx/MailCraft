@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardFooter } from "../components/ui/card";
 
@@ -10,6 +11,28 @@ import { Card, CardContent, CardFooter } from "../components/ui/card";
 // ];
 
 const Hero = () => {
+  const [copied, setCopied] = useState(false);
+
+  const emailContent = `SUBJECT: Partnership Opportunity – Q3
+
+Dear Sarah,
+
+I hope this message finds you well. I'm reaching out regarding a Q3 partnership opportunity.
+
+• 40% conversion uplift on average
+• 2-week free pilot, no commitment
+• Full API integration in < 1 day
+
+I'd love to schedule a quick call at your earliest convenience.
+
+Best regards,
+Alex Rivera`;
+
+  const handleCopy = async () => {
+    await navigator.clipboard.writeText(emailContent);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
   return (
     <section className="px-6 py-16 md:px-12 lg:px-20 md:py-24 border-b border-white/10">
       <div className="grid grid-cols-1 md:grid-cols-5 gap-12 items-center">
@@ -104,12 +127,26 @@ const Hero = () => {
               <span className="text-xs text-gray-500">
                 78 words &middot; professional
               </span>
-              <button className="flex items-center gap-1.5 text-xs text-[#E8FF4D] border border-[#E8FF4D] rounded px-3 py-1 hover:bg-[#E8FF4D]/10 transition-colors">
-                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
-                  <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
-                </svg>
-                COPY
+              <button
+                onClick={handleCopy}
+                className="flex items-center gap-1.5 text-xs text-[#E8FF4D] border border-[#E8FF4D] rounded px-3 py-1 hover:bg-[#E8FF4D]/10 transition-colors cursor-pointer"
+              >
+                {copied ? (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="20 6 9 17 4 12" />
+                    </svg>
+                    COPIED!
+                  </>
+                ) : (
+                  <>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+                    </svg>
+                    COPY
+                  </>
+                )}
               </button>
             </CardFooter>
           </Card>
