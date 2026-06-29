@@ -27,9 +27,11 @@ const SignInPage = () => {
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (formData: FormData) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
     setLoading(true);
     setError(null);
+    const formData = new FormData(e.currentTarget);
     const result = await signIn(formData);
     if (result?.error) {
       setError(result.error);
@@ -168,7 +170,7 @@ const SignInPage = () => {
             </div>
 
             
-            <form className="flex flex-col gap-5" action={handleSubmit}>
+            <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
               <div className="flex flex-col gap-2">
                 <Label className="text-xs tracking-widest text-gray-500">EMAIL</Label>
                 <Input
@@ -230,7 +232,16 @@ const SignInPage = () => {
                 disabled={loading}
                 className="w-full bg-[#E8FF4D] text-black font-bold hover:bg-[#d4eb44] cursor-pointer disabled:opacity-50"
               >
-                {loading ? "SIGNING IN..." : "SIGN IN →"}
+                {loading ? (
+                  <span className="flex items-center gap-2">
+                    <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                    </svg>
+                    SIGNING IN...
+                  </span>
+                ) : (
+                  "SIGN IN →"
+                )}
               </Button>
             </form>
 
