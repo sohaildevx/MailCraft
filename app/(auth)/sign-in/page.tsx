@@ -8,6 +8,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Separator } from "../../../components/ui/separator";
+import { signIn } from "../../../lib/actions/auth";
 
 const typingTexts = [
   "Write better emails.",
@@ -23,6 +24,18 @@ const perks = [
 
 const SignInPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (formData: FormData) => {
+    setLoading(true);
+    setError(null);
+    const result = await signIn(formData);
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
@@ -155,12 +168,14 @@ const SignInPage = () => {
             </div>
 
             
-            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-5" action={handleSubmit}>
               <div className="flex flex-col gap-2">
                 <Label className="text-xs tracking-widest text-gray-500">EMAIL</Label>
                 <Input
+                  name="email"
                   type="email"
                   placeholder="you@company.com"
+                  required
                   className="bg-transparent border-white/10 text-white placeholder:text-gray-600 focus-visible:ring-[#E8FF4D] focus-visible:border-[#E8FF4D]"
                 />
               </div>
@@ -169,8 +184,10 @@ const SignInPage = () => {
                 <Label className="text-xs tracking-widest text-gray-500">PASSWORD</Label>
                 <div className="relative">
                   <Input
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="••••••••"
+                    required
                     className="bg-transparent border-white/10 text-white placeholder:text-gray-600 focus-visible:ring-[#E8FF4D] focus-visible:border-[#E8FF4D] pr-10"
                   />
                   <button
@@ -204,11 +221,16 @@ const SignInPage = () => {
                 </Link>
               </div>
 
+              {error && (
+                <p className="text-sm text-red-400">{error}</p>
+              )}
+
               <Button
                 type="submit"
-                className="w-full bg-[#E8FF4D] text-black font-bold hover:bg-[#d4eb44] cursor-pointer"
+                disabled={loading}
+                className="w-full bg-[#E8FF4D] text-black font-bold hover:bg-[#d4eb44] cursor-pointer disabled:opacity-50"
               >
-                SIGN IN →
+                {loading ? "SIGNING IN..." : "SIGN IN →"}
               </Button>
             </form>
 

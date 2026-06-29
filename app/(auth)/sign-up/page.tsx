@@ -7,6 +7,7 @@ import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Separator } from "../../../components/ui/separator";
+import { signUp } from "../../../lib/actions/auth";
 
 const typingTexts = [
   "Your first email in 30 seconds.",
@@ -16,10 +17,21 @@ const typingTexts = [
 
 const SignUpPage = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (formData: FormData) => {
+    setLoading(true);
+    setError(null);
+    const result = await signUp(formData);
+    if (result?.error) {
+      setError(result.error);
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col h-screen">
-      
       <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20 border-b border-white/10">
         <div className="flex items-center gap-8">
           <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
@@ -47,12 +59,9 @@ const SignUpPage = () => {
         </div>
       </div>
 
-      
       <div className="flex flex-1 overflow-hidden">
-        
         <div className="hidden md:flex flex-col justify-between flex-1 px-12 lg:px-20 py-12 border-r border-white/10">
           <div className="flex flex-col gap-12">
-           
             <div className="flex flex-col gap-2">
               {typingTexts.map((text, i) => (
                 <motion.div
@@ -68,7 +77,6 @@ const SignUpPage = () => {
               ))}
             </div>
 
-            
             <div className="flex flex-col gap-3">
               {[0, 1, 2, 3].map((i) => (
                 <motion.div
@@ -81,7 +89,6 @@ const SignUpPage = () => {
               ))}
             </div>
 
-            
             <div className="flex flex-col gap-4 border-l-2 border-[#E8FF4D] pl-6">
               <p className="text-sm text-gray-300 leading-relaxed">
                 &quot;The tone controls are the killer feature. I can go from a
@@ -107,7 +114,6 @@ const SignUpPage = () => {
           </div>
         </div>
 
-        
         <div className="flex flex-col items-center justify-center flex-1 px-6 py-12">
           <div className="w-full max-w-sm flex flex-col gap-8">
             <div className="flex flex-col gap-2">
@@ -121,7 +127,6 @@ const SignUpPage = () => {
               </h1>
             </div>
 
-           
             <div className="flex gap-3">
               <Button variant="outline" className="flex-1 border-white/20 text-white hover:bg-white/5 cursor-pointer">
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
@@ -140,20 +145,20 @@ const SignUpPage = () => {
               </Button>
             </div>
 
-            
             <div className="flex items-center gap-4">
               <Separator className="flex-1 bg-white/10" />
               <span className="text-xs text-gray-500">OR</span>
               <Separator className="flex-1 bg-white/10" />
             </div>
 
-            
-            <form className="flex flex-col gap-5" onSubmit={(e) => e.preventDefault()}>
+            <form className="flex flex-col gap-5" action={handleSubmit}>
               <div className="flex flex-col gap-2">
                 <Label className="text-xs tracking-widest text-gray-500">FULL NAME</Label>
                 <Input
+                  name="name"
                   type="text"
                   placeholder="Alex Rivera"
+                  required
                   className="bg-transparent border-white/10 text-white placeholder:text-gray-600 focus-visible:ring-[#E8FF4D] focus-visible:border-[#E8FF4D]"
                 />
               </div>
@@ -161,8 +166,10 @@ const SignUpPage = () => {
               <div className="flex flex-col gap-2">
                 <Label className="text-xs tracking-widest text-gray-500">WORK EMAIL</Label>
                 <Input
+                  name="email"
                   type="email"
                   placeholder="you@company.com"
+                  required
                   className="bg-transparent border-white/10 text-white placeholder:text-gray-600 focus-visible:ring-[#E8FF4D] focus-visible:border-[#E8FF4D]"
                 />
               </div>
@@ -171,8 +178,11 @@ const SignUpPage = () => {
                 <Label className="text-xs tracking-widest text-gray-500">PASSWORD</Label>
                 <div className="relative">
                   <Input
+                    name="password"
                     type={showPassword ? "text" : "password"}
                     placeholder="Min. 8 characters"
+                    minLength={8}
+                    required
                     className="bg-transparent border-white/10 text-white placeholder:text-gray-600 focus-visible:ring-[#E8FF4D] focus-visible:border-[#E8FF4D] pr-10"
                   />
                   <button
@@ -196,11 +206,16 @@ const SignUpPage = () => {
                 </div>
               </div>
 
+              {error && (
+                <p className="text-sm text-red-400">{error}</p>
+              )}
+
               <Button
                 type="submit"
-                className="w-full bg-[#E8FF4D] text-black font-bold hover:bg-[#d4eb44] cursor-pointer"
+                disabled={loading}
+                className="w-full bg-[#E8FF4D] text-black font-bold hover:bg-[#d4eb44] cursor-pointer disabled:opacity-50"
               >
-                CREATE FREE ACCOUNT →
+                {loading ? "CREATING ACCOUNT..." : "CREATE FREE ACCOUNT →"}
               </Button>
 
               <p className="md:hidden text-sm text-gray-500 text-center">
