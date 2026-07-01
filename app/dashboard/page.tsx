@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -49,6 +50,7 @@ const initialForm = {
 };
 
 const DashboardPage = () => {
+  const router = useRouter();
   const [mobileTab, setMobileTab] = useState<"compose" | "preview">("compose");
   const [form, setForm] = useState(initialForm);
   const [generatedSubject, setGeneratedSubject] = useState("");
@@ -58,7 +60,14 @@ const DashboardPage = () => {
   const [copiedBody, setCopiedBody] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
   const [error, setError] = useState("");
+  const [signingOut, setSigningOut] = useState(false);
   const [credits] = useState(5);
+
+  const handleSignOut = async () => {
+    setSigningOut(true);
+    await signOut();
+    router.push("/sign-in");
+  };
 
   const updateField = (key: string, value: string) => {
     setForm((prev) => ({ ...prev, [key]: value }));
@@ -126,7 +135,7 @@ const DashboardPage = () => {
     <div className="flex flex-col h-screen bg-[#f0f0f0] text-black font-mono">
      
       <div className="flex items-center justify-between px-4 py-3 md:px-8 border-b border-gray-300 bg-[#e8e8e8]">
-        <Link href="/" className="flex items-center gap-3 transition-opacity hover:opacity-80">
+        <div className="flex items-center gap-3">
           <span className="flex items-center justify-center rounded-md bg-[#E8FF4D] p-1.5">
             <img src="/logo/logo.svg" alt="MailCraft logo" width={22} height={22} />
           </span>
@@ -136,7 +145,7 @@ const DashboardPage = () => {
           <span className="text-xs text-gray-400 tracking-wider hidden sm:inline">
             AI EMAIL GENERATOR
           </span>
-        </Link>
+        </div>
 
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 text-xs">
@@ -150,16 +159,24 @@ const DashboardPage = () => {
             Buy credits
           </Link>
           <Separator orientation="vertical" className="h-4 bg-gray-200 hidden sm:block" />
-          <form action={signOut}>
-            <Button
-              type="submit"
-              variant="outline"
-              size="sm"
-              className="border-gray-300 text-gray-500 hover:bg-[#65a30d] hover:text-white hover:border-[#65a30d] text-xs cursor-pointer transition-all duration-200"
-            >
-              SIGN OUT
-            </Button>
-          </form>
+          <Button
+            onClick={handleSignOut}
+            variant="outline"
+            size="sm"
+            disabled={signingOut}
+            className="border-gray-300 text-gray-500 hover:bg-[#65a30d] hover:text-white hover:border-[#65a30d] text-xs cursor-pointer transition-all duration-200 disabled:opacity-50"
+          >
+            {signingOut ? (
+              <span className="flex items-center gap-1.5">
+                <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                </svg>
+                SIGNING OUT...
+              </span>
+            ) : (
+              "SIGN OUT"
+            )}
+          </Button>
         </div>
       </div>
 

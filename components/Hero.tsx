@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardFooter } from "../components/ui/card";
+import Link from "next/link";
 
 // const stats = [
 //   { value: "12,400+", label: "EMAILS GENERATED" },
@@ -55,15 +56,19 @@ Alex Rivera`;
           </p>
 
           <div className="flex flex-wrap items-center gap-4">
+            <Link href='/sign-up'>
             <Button
               size="lg"
               className="bg-[#E8FF4D] text-black font-semibold hover:bg-[#d4eb44] text-sm md:text-base cursor-pointer"
             >
               GENERATE YOUR FIRST EMAIL &rarr;
             </Button>
+          </Link>
+          
             <Button
               variant="outline"
               size="lg"
+              onClick={() => document.getElementById("how-it-works")?.scrollIntoView({ behavior: "smooth" })}
               className="border-white/20 text-white hover:bg-white/5 text-sm md:text-base cursor-pointer"
             >
               SEE HOW IT WORKS

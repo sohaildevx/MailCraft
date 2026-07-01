@@ -31,10 +31,16 @@ const SignInPage = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    const formData = new FormData(e.currentTarget);
-    const result = await signIn(formData);
-    if (result?.error) {
-      setError(result.error);
+
+    try {
+      const formData = new FormData(e.currentTarget);
+      const result = await signIn(formData);
+      if (result?.error) {
+        setError(result.error);
+      }
+    } catch {
+      setError("Network error. Please check your connection and try again.");
+    } finally {
       setLoading(false);
     }
   };
@@ -224,7 +230,14 @@ const SignInPage = () => {
               </div>
 
               {error && (
-                <p className="text-sm text-red-400">{error}</p>
+                <div className="flex items-start gap-2 text-sm text-red-400 bg-red-400/10 border border-red-400/20 rounded-md px-3 py-2.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="flex-shrink-0 mt-0.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="12" y1="8" x2="12" y2="12"/>
+                    <line x1="12" y1="16" x2="12.01" y2="16"/>
+                  </svg>
+                  <span>{error}</span>
+                </div>
               )}
 
               <Button

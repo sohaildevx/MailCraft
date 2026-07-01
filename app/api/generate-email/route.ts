@@ -1,12 +1,27 @@
 import { NextRequest, NextResponse } from "next/server";
 import OpenAI from "openai";
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
-  const body = await req.json();
+  if (!process.env.OPENAI_API_KEY) {
+    return NextResponse.json(
+      { error: "OpenAI API key not configured. Add OPENAI_API_KEY to .env.local" },
+      { status: 500 }
+    );
+  }
+
+  const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY,
+  });
+
+  let body;
+  try {
+    body = await req.json();
+  } catch {
+    return NextResponse.json(
+      { error: "Invalid request body" },
+      { status: 400 }
+    );
+  }
 
   const {
     companyName,
@@ -22,7 +37,7 @@ export async function POST(req: NextRequest) {
 
   if (!companyName || !jobRole || !whatApplyingFor) {
     return NextResponse.json(
-      { error: "Missing required fields" },
+      { error: "Company name, job role, and purpose are required" },
       { status: 400 }
     );
   }
@@ -62,23 +77,52 @@ ${additionalContext ? `Additional Context:\n${additionalContext}` : ""}`;
 
     if (!content) {
       return NextResponse.json(
-        { error: "No response from AI" },
+        { error: "AI returned empty response. Try again." },
         { status: 500 }
       );
     }
 
-    const parsed = JSON.parse(content);
+    let parsed;
+    try {
+      parsed = JSON.parse(content);
+    } catch {
+      return NextResponse.json(
+        { error: "AI returned invalid format. Try again." },
+        { status: 500 }
+      );
+    }
 
     return NextResponse.json({
       subject: parsed.subject || subjectLine || `${emailType}: ${whatApplyingFor} at ${companyName}`,
       body: parsed.body || "",
     });
   } catch (error: unknown) {
-    if (error instanceof Error) {
-      console.error("OpenAI error:", error.message);
+    console.error("OpenAI error:", error);
+
+    if (error instanceof OpenAI.APIError) {
+      const status = error.status;
+      if (status === 401) {
+        return NextResponse.json(
+          { error: "Invalid API key. Check your OPENAI_API_KEY in .env.local" },
+          { status: 401 }
+        );
+      }
+      if (status === 429) {
+        return NextResponse.json(
+          { error: "Rate limited. Wait a moment and try again." },
+          { status: 429 }
+        );
+      }
+      if (status === 503) {
+        return NextResponse.json(
+          { error: "OpenAI is overloaded. Try again in a few seconds." },
+          { status: 503 }
+        );
+      }
     }
+
     return NextResponse.json(
-      { error: "Failed to generate email" },
+      { error: "Something went wrong. Try again." },
       { status: 500 }
     );
   }
