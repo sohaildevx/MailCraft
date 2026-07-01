@@ -57,6 +57,7 @@ const DashboardPage = () => {
   const [copiedSubject, setCopiedSubject] = useState(false);
   const [copiedBody, setCopiedBody] = useState(false);
   const [copiedAll, setCopiedAll] = useState(false);
+  const [error, setError] = useState("");
   const [credits] = useState(5);
 
   const updateField = (key: string, value: string) => {
@@ -65,31 +66,30 @@ const DashboardPage = () => {
 
   const handleGenerate = async () => {
     setGenerating(true);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
+    setError("");
 
-    const subject = form.subjectLine || `${form.emailType}: ${form.whatApplyingFor} at ${form.companyName}`;
-    const body = `Dear ${form.hiringManager || "Hiring Manager"},
+    try {
+      const res = await fetch("/api/generate-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
 
-I hope this message finds you well. I'm writing to express my interest in the ${form.jobRole} position at ${form.companyName}.
+      const data = await res.json();
 
-${form.whatApplyingFor}
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+        return;
+      }
 
-Here are some additional details:
-
-${form.additionalContext
-  .split("\n")
-  .filter((p) => p.trim())
-  .map((p) => `• ${p.trim()}`)
-  .join("\n")}
-
-I look forward to hearing from you.
-
-Best regards`;
-
-    setGeneratedSubject(subject);
-    setGeneratedBody(body);
-    setGenerating(false);
-    setMobileTab("preview");
+      setGeneratedSubject(data.subject);
+      setGeneratedBody(data.body);
+      setMobileTab("preview");
+    } catch {
+      setError("Failed to generate email. Try again.");
+    } finally {
+      setGenerating(false);
+    }
   };
 
   const handleReset = () => {
@@ -261,6 +261,12 @@ Best regards`;
               </select>
             </div>
           </div>
+
+          {error && (
+            <p className="text-sm text-red-500 bg-red-50 border border-red-200 rounded-md px-3 py-2">
+              {error}
+            </p>
+          )}
 
           <Button
             onClick={handleGenerate}
