@@ -1,23 +1,30 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
 import { Separator } from "../../../components/ui/separator";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { TagInput } from "../../../components/TagInput";
+import { ProjectList } from "../../../components/ProjectList";
+import { error } from "next/dist/build/output/log";
 
 const experienceLevels = ["Student", "Junior", "Mid-Level", "Senior"];
+
+interface Project {
+  name: string;
+  description: string;
+}
 
 const initialProfile = {
   fullName: "",
   jobTitle: "",
   experienceLevel: "Student",
   techStack: [] as string[],
-  projects: "",
+  projects: [] as Project[],
   githubUrl: "",
   linkedinUrl: "",
   portfolioUrl: "",
@@ -26,14 +33,48 @@ const initialProfile = {
 export default function ProfilePage() {
   const router = useRouter();
   const [profile, setProfile] = useState(initialProfile);
+  const [savedProfile, setSavedProfile] = useState(initialProfile);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [credits] = useState(5);
+  const pathname = usePathname();
+
+  const loadProfile = useCallback(async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (res.ok) {
+        const data = await res.json();
+        const loaded = {
+          fullName: data.name || "",
+          jobTitle: data.job_title || "",
+          experienceLevel: data.experience_level || "Student",
+          techStack: data.tech_stack ? data.tech_stack.split(", ").filter(Boolean) : [],
+          projects: data.projects ? data.projects.split("\n---\n").filter(Boolean).map((p: string) => {
+            const [name, ...desc] = p.split(" — ");
+            return { name: name || "", description: desc.join(" — ") || "" };
+          }) : [],
+          githubUrl: data.github_url || "",
+          linkedinUrl: data.linkedin_url || "",
+          portfolioUrl: data.portfolio_url || "",
+        };
+        setProfile(loaded);
+        setSavedProfile(loaded);
+      }
+    } catch {
+      // fallback: profile stays empty
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    loadProfile();
+  }, [pathname, loadProfile]);
 
   const hasChanges = useMemo(() => {
-    return JSON.stringify(profile) !== JSON.stringify(initialProfile);
-  }, [profile]);
+    return JSON.stringify(profile) !== JSON.stringify(savedProfile);
+  }, [profile, savedProfile]);
 
   const updateField = <K extends keyof typeof profile>(key: K, value: (typeof profile)[K]) => {
     setProfile((prev) => ({ ...prev, [key]: value }));
@@ -41,10 +82,26 @@ export default function ProfilePage() {
 
   const handleSave = async () => {
     setSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-    setSaving(false);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    try {
+      const res = await fetch("/api/profile", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(profile),
+      });
+
+      if (res.ok) {
+        setSavedProfile(profile);
+        setSaved(true);
+        setTimeout(() => {
+          setSaved(false);
+          router.push("/dashboard");
+        }, 1000);
+      }
+    } catch(error) {
+       throw error;
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -209,12 +266,9 @@ export default function ProfilePage() {
               <Label className="text-xs tracking-widest text-gray-500">
                 PROJECTS
               </Label>
-              <textarea
-                value={profile.projects}
-                onChange={(e) => updateField("projects", e.target.value)}
-                placeholder={"ExpenseFlow — React expense tracker with 500+ users\nOpenNote — Open-source note-taking app built with Next.js"}
-                rows={4}
-                className="w-full bg-[#f5f5f5] border border-gray-300 rounded-md px-3 py-2 text-sm text-black placeholder:text-gray-400 focus:ring-[#65a30d] focus:border-[#65a30d] resize-none outline-none"
+              <ProjectList
+                projects={profile.projects}
+                onChange={(projects) => updateField("projects", projects)}
               />
             </div>
           </div>
