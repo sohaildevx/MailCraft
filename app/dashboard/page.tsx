@@ -7,6 +7,7 @@ import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
 import { Separator } from "../../components/ui/separator";
+import { DropdownMenu } from "../../components/DropdownMenu";
 import { signOut } from "../../lib/actions/auth";
 
 const emailTypes = [
@@ -159,24 +160,48 @@ const DashboardPage = () => {
             Buy credits
           </Link>
           <Separator orientation="vertical" className="h-4 bg-gray-200 hidden sm:block" />
-          <Button
-            onClick={handleSignOut}
-            variant="outline"
-            size="sm"
-            disabled={signingOut}
-            className="border-gray-300 text-gray-500 hover:bg-[#65a30d] hover:text-white hover:border-[#65a30d] text-xs cursor-pointer transition-all duration-200 disabled:opacity-50"
-          >
-            {signingOut ? (
-              <span className="flex items-center gap-1.5">
-                <svg className="animate-spin" xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
-                </svg>
-                SIGNING OUT...
-              </span>
-            ) : (
-              "SIGN OUT"
-            )}
-          </Button>
+          <DropdownMenu
+            trigger={
+              <div className="w-8 h-8 rounded-full bg-[#65a30d] flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity">
+                S
+              </div>
+            }
+            items={[
+              {
+                label: "Profile",
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/>
+                    <circle cx="12" cy="7" r="4"/>
+                  </svg>
+                ),
+                href: "/dashboard/profile",
+              },
+              {
+                label: `${credits} credits`,
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <circle cx="12" cy="12" r="8"/>
+                    <path d="M12 8v8"/>
+                    <path d="M8 12h8"/>
+                  </svg>
+                ),
+              },
+              { label: "separator" },
+              {
+                label: signingOut ? "Signing out..." : "Sign out",
+                icon: (
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                ),
+                onClick: handleSignOut,
+                danger: true,
+              },
+            ]}
+          />
         </div>
       </div>
 
