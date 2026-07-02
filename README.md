@@ -96,4 +96,4 @@ mailcraft/
 
 ## License
 
-MIT
+[MIT](LICENSE)
