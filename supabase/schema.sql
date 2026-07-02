@@ -21,6 +21,14 @@ create table public.profiles (
   locked_until timestamptz,
   last_login_at timestamptz,
   last_login_ip text,
+  -- Profile fields
+  job_title text default '',
+  experience_level text default 'Student' check (experience_level in ('Student', 'Junior', 'Mid-Level', 'Senior')),
+  tech_stack text default '',
+  projects text default '',
+  github_url text default '',
+  linkedin_url text default '',
+  portfolio_url text default '',
   created_at timestamptz not null default now(),
   updated_at timestamptz not null default now()
 );
