@@ -10,7 +10,7 @@ import { Separator } from "../../../components/ui/separator";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { TagInput } from "../../../components/TagInput";
 import { ProjectList } from "../../../components/ProjectList";
-import { error } from "next/dist/build/output/log";
+
 
 const experienceLevels = ["Student", "Junior", "Mid-Level", "Senior"];
 
@@ -199,6 +199,41 @@ export default function ProfilePage() {
             </Link>
           </div>
 
+          {loading ? (
+            <div className="flex flex-col gap-6">
+              <div className="bg-[#e4e4e4] border border-gray-300 rounded-xl p-6 flex flex-col gap-5">
+                <span className="text-xs tracking-widest text-gray-400">PERSONAL INFO</span>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col gap-2">
+                    <div className="h-3 w-24 bg-gray-300 rounded animate-pulse" />
+                    <div className="h-10 w-full bg-gray-300 rounded-md animate-pulse" />
+                  </div>
+                ))}
+              </div>
+              <div className="bg-[#e4e4e4] border border-gray-300 rounded-xl p-6 flex flex-col gap-5">
+                <span className="text-xs tracking-widest text-gray-400">SKILLS & PROJECTS</span>
+                <div className="flex flex-col gap-2">
+                  <div className="h-3 w-20 bg-gray-300 rounded animate-pulse" />
+                  <div className="h-10 w-full bg-gray-300 rounded-md animate-pulse" />
+                </div>
+                <div className="flex flex-col gap-2">
+                  <div className="h-3 w-16 bg-gray-300 rounded animate-pulse" />
+                  <div className="h-20 w-full bg-gray-300 rounded-md animate-pulse" />
+                </div>
+              </div>
+              <div className="bg-[#e4e4e4] border border-gray-300 rounded-xl p-6 flex flex-col gap-5">
+                <span className="text-xs tracking-widest text-gray-400">LINKS</span>
+                {[1, 2, 3].map((i) => (
+                  <div key={i} className="flex flex-col gap-2">
+                    <div className="h-3 w-20 bg-gray-300 rounded animate-pulse" />
+                    <div className="h-10 w-full bg-gray-300 rounded-md animate-pulse" />
+                  </div>
+                ))}
+              </div>
+              <div className="h-12 w-full bg-gray-300 rounded-md animate-pulse" />
+            </div>
+          ) : (
+          <>
           <div className="bg-[#e4e4e4] border border-gray-300 rounded-xl p-6 flex flex-col gap-5">
             <span className="text-xs tracking-widest text-gray-400">
               PERSONAL INFO
@@ -338,6 +373,8 @@ export default function ProfilePage() {
               "SAVE PROFILE"
             )}
           </Button>
+          </>
+          )}
         </div>
       </div>
     </div>
