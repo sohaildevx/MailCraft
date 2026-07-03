@@ -224,7 +224,7 @@ const SignInPage = () => {
                   <input type="checkbox" className="w-4 h-4 accent-[#E8FF4D] bg-transparent border-white/20 rounded" />
                   Remember me
                 </label>
-                <Link href="#" className="text-sm text-gray-400 hover:text-white transition-colors">
+                <Link href="/forgot-password" className="text-sm text-gray-400 hover:text-white transition-colors">
                   Forgot password?
                 </Link>
               </div>

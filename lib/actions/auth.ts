@@ -100,7 +100,7 @@ export async function resetPassword(formData: FormData) {
   }
 
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SUPABASE_URL}/auth/v1/verify?token=...&type=recovery&redirect_to=${process.env.NEXT_PUBLIC_SITE_URL}/reset-password`,
+    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback?next=/reset-password`,
   });
 
   if (error) {
@@ -108,6 +108,30 @@ export async function resetPassword(formData: FormData) {
   }
 
   return { success: "Check your email for a password reset link." };
+}
+
+export async function updatePassword(formData: FormData) {
+  const supabase = await createClient();
+
+  const password = formData.get("password") as string;
+
+  if (!password) {
+    return { error: "Please enter a new password." };
+  }
+
+  if (password.length < 6) {
+    return { error: "Password must be at least 6 characters." };
+  }
+
+  const { error } = await supabase.auth.updateUser({
+    password,
+  });
+
+  if (error) {
+    return { error: getFriendlyError(error.message) };
+  }
+
+  return { success: "Password updated successfully." };
 }
 
 export async function verifyOtp(formData: FormData) {
