@@ -1,5 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createServerClient } from "@supabase/ssr";
 import OpenAI from "openai";
+
+function createClient(req: NextRequest) {
+  return createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return req.cookies.getAll();
+        },
+        setAll() {},
+      },
+    }
+  );
+}
 
 export async function POST(req: NextRequest) {
   if (!process.env.OPENAI_API_KEY) {
@@ -8,6 +24,19 @@ export async function POST(req: NextRequest) {
       { status: 500 }
     );
   }
+
+  const supabase = createClient(req);
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return NextResponse.json({ error: "Not authenticated" }, { status: 401 });
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", user.id)
+    .single();
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -42,6 +71,10 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  const profileContext = profile
+    ? `\nUser Profile:\n- Name: ${profile.name || "Unknown"}\n- Job Title: ${profile.job_title || "Unknown"}\n- Experience Level: ${profile.experience_level || "Unknown"}\n- Tech Stack: ${profile.tech_stack || "Unknown"}\n- Projects: ${profile.projects || "None"}`
+    : "";
+
   const systemPrompt = `You are MailCraft, an expert AI email writer. Write a ${tone.toLowerCase()} ${emailType.toLowerCase()} email.
 
 Rules:
@@ -51,7 +84,10 @@ Rules:
 - Email type: ${emailType}
 - No markdown, no code fences, just raw JSON
 - The body should be well-structured with proper paragraphs
-- Sign off professionally (no name needed, the user will add it later)`;
+- Sign off professionally${profile?.name ? ` as ${profile.name}` : " (no name needed, the user will add it later)"}
+- IMPORTANT: Only mention technologies, skills, and tools that are explicitly listed in the user's tech stack. Do NOT assume or invent skills the user does not have. If the user has no tech stack provided, avoid mentioning specific technologies.
+- Keep the email concise (150-200 words). Be direct and impactful — cover key points (relevant skills, experience, value you bring) without fluff or filler sentences.
+${profileContext}`;
 
   const userPrompt = `Write an email for:
 
@@ -70,7 +106,7 @@ ${additionalContext ? `Additional Context:\n${additionalContext}` : ""}`;
         { role: "user", content: userPrompt },
       ],
       temperature: 0.7,
-      max_tokens: 1000,
+      max_tokens: 500,
     });
 
     const content = completion.choices[0]?.message?.content?.trim();
