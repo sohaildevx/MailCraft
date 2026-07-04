@@ -1,8 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { createServerClient } from "@supabase/ssr";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -13,6 +14,47 @@ const ResetPasswordPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [validToken, setValidToken] = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (!hash) {
+      setChecking(false);
+      return;
+    }
+
+    const params = new URLSearchParams(hash.substring(1));
+    const accessToken = params.get("access_token");
+    const refreshToken = params.get("refresh_token");
+
+    if (accessToken && refreshToken) {
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL!,
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        {
+          cookies: {
+            getAll() {
+              return [];
+            },
+            setAll() {},
+          },
+        }
+      );
+
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      }).then(({ error }: { error: Error | null }) => {
+        if (!error) {
+          setValidToken(true);
+        }
+        setChecking(false);
+      });
+    } else {
+      setChecking(false);
+    }
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,6 +75,55 @@ const ResetPasswordPage = () => {
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="flex flex-col h-screen">
+        <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20 border-b border-white/10">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+              <span className="flex items-center justify-center rounded-md bg-[#E8FF4D] p-1.5">
+                <img src="/logo/logo.svg" alt="MailCraft logo" width={24} height={24} />
+              </span>
+              <span className="text-sm font-bold tracking-tight text-white">
+                MAILCRAFT
+              </span>
+            </Link>
+          </div>
+        </div>
+        <div className="flex flex-1 items-center justify-center">
+          <span className="text-gray-400">Verifying link...</span>
+        </div>
+      </div>
+    );
+  }
+
+  if (!validToken) {
+    return (
+      <div className="flex flex-col h-screen">
+        <div className="flex items-center justify-between px-6 py-4 md:px-12 lg:px-20 border-b border-white/10">
+          <div className="flex items-center gap-8">
+            <Link href="/" className="flex items-center gap-2 transition-opacity hover:opacity-80">
+              <span className="flex items-center justify-center rounded-md bg-[#E8FF4D] p-1.5">
+                <img src="/logo/logo.svg" alt="MailCraft logo" width={24} height={24} />
+              </span>
+              <span className="text-sm font-bold tracking-tight text-white">
+                MAILCRAFT
+              </span>
+            </Link>
+          </div>
+        </div>
+        <div className="flex flex-1 items-center justify-center px-6">
+          <div className="flex flex-col items-center gap-4">
+            <span className="text-red-400">Invalid or expired reset link.</span>
+            <Link href="/forgot-password" className="text-[#E8FF4D] hover:underline">
+              Request a new link →
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col h-screen">
