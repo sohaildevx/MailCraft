@@ -164,3 +164,39 @@ export async function getUser() {
   } = await supabase.auth.getUser();
   return user;
 }
+
+export async function signInWithGitHub() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "github",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { error: getFriendlyError(error.message) };
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+}
+
+export async function signInWithGoogle() {
+  const supabase = await createClient();
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: "google",
+    options: {
+      redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL}/auth/callback`,
+    },
+  });
+
+  if (error) {
+    return { error: getFriendlyError(error.message) };
+  }
+
+  if (data.url) {
+    redirect(data.url);
+  }
+}

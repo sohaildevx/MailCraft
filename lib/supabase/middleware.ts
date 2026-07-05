@@ -38,7 +38,8 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith("/sign-in") ||
     request.nextUrl.pathname.startsWith("/sign-up") ||
     request.nextUrl.pathname.startsWith("/forgot-password") ||
-    request.nextUrl.pathname.startsWith("/reset-password");
+    request.nextUrl.pathname.startsWith("/reset-password") ||
+    request.nextUrl.pathname.startsWith("/auth/callback");
 
   if (!user && !isPublicPage) {
     const url = request.nextUrl.clone();
