@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createServerClient } from "@supabase/ssr";
+import { createBrowserClient } from "@supabase/ssr";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -29,17 +29,9 @@ const ResetPasswordPage = () => {
     const refreshToken = params.get("refresh_token");
 
     if (accessToken && refreshToken) {
-      const supabase = createServerClient(
+      const supabase = createBrowserClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
-        {
-          cookies: {
-            getAll() {
-              return [];
-            },
-            setAll() {},
-          },
-        }
+        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!
       );
 
       supabase.auth.setSession({
