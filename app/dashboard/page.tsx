@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
 import { Input } from "../../components/ui/input";
 import { Label } from "../../components/ui/label";
@@ -190,7 +191,9 @@ const DashboardPage = () => {
               { label: "separator" },
               {
                 label: signingOut ? "Signing out..." : "Sign out",
-                icon: (
+                icon: signingOut ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
                     <polyline points="16 17 21 12 16 7"/>
@@ -199,6 +202,7 @@ const DashboardPage = () => {
                 ),
                 onClick: handleSignOut,
                 danger: true,
+                closeOnClick: false,
               },
             ]}
           />

@@ -9,6 +9,7 @@ interface DropdownItem {
   onClick?: () => void;
   danger?: boolean;
   href?: string;
+  closeOnClick?: boolean;
 }
 
 interface DropdownMenuProps {
@@ -59,7 +60,9 @@ export function DropdownMenu({ trigger, items }: DropdownMenuProps) {
                 key={i}
                 onClick={() => {
                   item.onClick?.();
-                  setOpen(false);
+                  if (item.closeOnClick !== false) {
+                    setOpen(false);
+                  }
                 }}
                 className={`w-full flex items-center gap-2.5 px-4 py-2.5 text-sm transition-colors cursor-pointer ${
                   item.danger
