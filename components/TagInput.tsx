@@ -29,6 +29,14 @@ export function TagInput({ tags, onChange, placeholder }: TagInputProps) {
     onChange(tags.filter((t) => t !== tag));
   };
 
+  const addTag = () => {
+    const trimmed = input.trim().replace(/,/g, "");
+    if (trimmed && !tags.includes(trimmed)) {
+      onChange([...tags, trimmed]);
+    }
+    setInput("");
+  };
+
   return (
     <div className="flex flex-wrap items-center gap-2 bg-[#f5f5f5] border border-gray-300 rounded-md px-3 py-2 min-h-[40px] focus-within:ring-[#65a30d] focus-within:border-[#65a30d]">
       {tags.map((tag) => (
@@ -49,14 +57,25 @@ export function TagInput({ tags, onChange, placeholder }: TagInputProps) {
           </button>
         </span>
       ))}
-      <input
-        type="text"
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={handleKeyDown}
-        placeholder={tags.length === 0 ? placeholder : ""}
-        className="flex-1 min-w-[120px] bg-transparent text-sm text-black placeholder:text-gray-400 outline-none"
-      />
+      <div className="flex items-center gap-1 flex-1 min-w-[120px]">
+        <input
+          type="text"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder={tags.length === 0 ? placeholder : ""}
+          className="flex-1 min-w-0 bg-transparent text-sm text-black placeholder:text-gray-400 outline-none"
+        />
+        {input.trim() && (
+          <button
+            type="button"
+            onClick={addTag}
+            className="text-[#65a30d] text-xs font-medium hover:text-[#558a0b] cursor-pointer shrink-0"
+          >
+            ADD
+          </button>
+        )}
+      </div>
     </div>
   );
 }
