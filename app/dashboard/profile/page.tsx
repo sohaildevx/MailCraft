@@ -38,7 +38,7 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [credits] = useState(5);
+  const [credits] = useState(10);
   const pathname = usePathname();
 
   const loadProfile = useCallback(async () => {

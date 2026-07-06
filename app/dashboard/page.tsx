@@ -63,7 +63,7 @@ const DashboardPage = () => {
   const [copiedAll, setCopiedAll] = useState(false);
   const [error, setError] = useState("");
   const [signingOut, setSigningOut] = useState(false);
-  const [credits] = useState(5);
+  const [credits] = useState(10);
 
   const handleSignOut = async () => {
     setSigningOut(true);

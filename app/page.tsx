@@ -2,6 +2,7 @@ import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
+import { Pricing } from "../components/Pricing";
 import FadeIn from "../components/FadeIn";
 
 export default function Home() {
@@ -17,6 +18,9 @@ export default function Home() {
         </FadeIn>
         <FadeIn>
           <HowItWorks />
+        </FadeIn>
+        <FadeIn>
+          <Pricing />
         </FadeIn>
       </main>
     </>
