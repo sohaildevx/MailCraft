@@ -3,6 +3,7 @@ import Hero from "../components/Hero";
 import Features from "../components/Features";
 import HowItWorks from "../components/HowItWorks";
 import { Pricing } from "../components/Pricing";
+import { FAQ } from "../components/FAQ";
 import FadeIn from "../components/FadeIn";
 
 export default function Home() {
@@ -21,6 +22,9 @@ export default function Home() {
         </FadeIn>
         <FadeIn>
           <Pricing />
+        </FadeIn>
+        <FadeIn>
+          <FAQ />
         </FadeIn>
       </main>
     </>
