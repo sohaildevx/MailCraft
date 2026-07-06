@@ -38,7 +38,7 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [credits] = useState(10);
+  const [credits, setCredits] = useState<number | null>(null);
   const pathname = usePathname();
 
   const loadProfile = useCallback(async () => {
@@ -61,6 +61,7 @@ export default function ProfilePage() {
         };
         setProfile(loaded);
         setSavedProfile(loaded);
+        setCredits(data.credits ?? 10);
       }
     } catch {
       // fallback: profile stays empty
@@ -122,7 +123,11 @@ export default function ProfilePage() {
 
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 text-xs">
-            <span className="text-[#65a30d] font-bold">{credits}</span>
+            {credits === null ? (
+              <span className="h-4 w-8 bg-gray-300 rounded animate-pulse" />
+            ) : (
+              <span className="text-[#65a30d] font-bold">{credits}</span>
+            )}
             <span className="text-gray-400">credits</span>
           </span>
           <Link
@@ -149,7 +154,7 @@ export default function ProfilePage() {
                 ),
               },
               {
-                label: `${credits} credits`,
+                label: credits === null ? "Loading..." : `${credits} credits`,
                 icon: (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="8"/>

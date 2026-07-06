@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
@@ -63,7 +63,22 @@ const DashboardPage = () => {
   const [copiedAll, setCopiedAll] = useState(false);
   const [error, setError] = useState("");
   const [signingOut, setSigningOut] = useState(false);
-  const [credits] = useState(10);
+  const [credits, setCredits] = useState<number | null>(null);
+
+  useEffect(() => {
+    const fetchCredits = async () => {
+      try {
+        const res = await fetch("/api/profile");
+        if (res.ok) {
+          const data = await res.json();
+          setCredits(data.credits ?? 10);
+        }
+      } catch {
+        setCredits(10);
+      }
+    };
+    fetchCredits();
+  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -95,6 +110,9 @@ const DashboardPage = () => {
 
       setGeneratedSubject(data.subject);
       setGeneratedBody(data.body);
+      if (data.creditsRemaining !== undefined) {
+        setCredits(data.creditsRemaining);
+      }
       setMobileTab("preview");
     } catch {
       setError("Failed to generate email. Try again.");
@@ -151,7 +169,11 @@ const DashboardPage = () => {
 
         <div className="flex items-center gap-4">
           <span className="flex items-center gap-1.5 text-xs">
-            <span className="text-[#65a30d] font-bold">{credits}</span>
+            {credits === null ? (
+              <span className="h-4 w-8 bg-gray-300 rounded animate-pulse" />
+            ) : (
+              <span className="text-[#65a30d] font-bold">{credits}</span>
+            )}
             <span className="text-gray-400">credits</span>
           </span>
           <Link
@@ -179,7 +201,7 @@ const DashboardPage = () => {
                 href: "/dashboard/profile",
               },
               {
-                label: `${credits} credits`,
+                label: credits === null ? "Loading..." : `${credits} credits`,
                 icon: (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="8"/>
@@ -316,7 +338,7 @@ const DashboardPage = () => {
 
           <Button
             onClick={handleGenerate}
-            disabled={!form.companyName || !form.jobRole || !form.whatApplyingFor || generating || credits <= 0}
+            disabled={!form.companyName || !form.jobRole || !form.whatApplyingFor || generating || credits === null || (credits !== null && credits <= 0)}
             className="w-full bg-black text-white font-bold hover:bg-[#E8FF4D] hover:text-black cursor-pointer disabled:opacity-50 transition-all duration-200"
           >
             {generating ? (

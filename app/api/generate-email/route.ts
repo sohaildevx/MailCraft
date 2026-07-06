@@ -2,6 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 import { createServerClient } from "@supabase/ssr";
 import OpenAI from "openai";
 
+const PLAN_CREDITS: Record<string, number> = {
+  free: 10,
+  pro: 100,
+  team: 500,
+};
+
 function createClient(req: NextRequest) {
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -37,6 +43,35 @@ export async function POST(req: NextRequest) {
     .select("*")
     .eq("id", user.id)
     .single();
+
+  if (!profile) {
+    return NextResponse.json({ error: "Profile not found" }, { status: 404 });
+  }
+
+  
+  const lastReset = new Date(profile.credits_reset_at);
+  const now = new Date();
+  const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
+
+  if (daysSinceReset >= 30) {
+    const newCredits = PLAN_CREDITS[profile.subscription_tier] || PLAN_CREDITS.free;
+    await supabase
+      .from("profiles")
+      .update({
+        credits: newCredits,
+        credits_reset_at: now.toISOString(),
+      })
+      .eq("id", user.id);
+    profile.credits = newCredits;
+  }
+
+ 
+  if (profile.credits <= 0) {
+    return NextResponse.json(
+      { error: "No credits left. Upgrade your plan to generate more emails." },
+      { status: 403 }
+    );
+  }
 
   const openai = new OpenAI({
     apiKey: process.env.OPENAI_API_KEY,
@@ -128,9 +163,26 @@ ${additionalContext ? `Additional Context:\n${additionalContext}` : ""}`;
       );
     }
 
+   
+    const newCredits = profile.credits - 1;
+    await supabase
+      .from("profiles")
+      .update({ credits: newCredits })
+      .eq("id", user.id);
+
+    await supabase
+      .from("credit_history")
+      .insert({
+        user_id: user.id,
+        amount: -1,
+        type: "spend",
+        description: `Generated ${emailType} email for ${companyName}`,
+      });
+
     return NextResponse.json({
       subject: parsed.subject || subjectLine || `${emailType}: ${whatApplyingFor} at ${companyName}`,
       body: parsed.body || "",
+      creditsRemaining: newCredits,
     });
   } catch (error: unknown) {
     console.error("OpenAI error:", error);
