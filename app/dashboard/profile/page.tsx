@@ -131,7 +131,7 @@ export default function ProfilePage() {
             <span className="text-gray-400">credits</span>
           </span>
           <Link
-            href="/pricing"
+            href="/dashboard/pricing"
             className="text-xs font-medium text-[#65a30d] hover:underline hidden sm:inline"
           >
             Buy credits
