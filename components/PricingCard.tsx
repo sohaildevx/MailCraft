@@ -31,7 +31,7 @@ export function PricingCard({
           : "bg-[#1a1a16] border-white/10"
       }`}
     >
-      {/* Badge */}
+     
       {badge && (
         <span
           className={`absolute -top-3 left-1/2 -translate-x-1/2 text-[10px] tracking-widest font-bold px-3 py-1 rounded-full ${
@@ -42,7 +42,7 @@ export function PricingCard({
         </span>
       )}
 
-      {/* Current badge */}
+     
       {isCurrent && (
         <span className="absolute top-4 right-4 text-[10px] tracking-widest text-gray-500 border border-white/10 rounded px-2 py-0.5">
           CURRENT
