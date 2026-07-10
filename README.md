@@ -4,6 +4,10 @@ AI-powered email generator for job seekers. Stop spending hours drafting cold em
 
 ![Landing Page](public/Images/Landing.png)
 
+## Demo Video
+
+[![Demo Video](https://img.youtube.com/vi/cuOIzpGdaVU/maxresdefault.jpg)](https://youtu.be/cuOIzpGdaVU?si=0B3D1LUFxbn9gggl)
+
 ## Problem
 
 Job seekers spend 20-30 minutes crafting each application email, only to send generic messages that get ignored. MailCraft generates personalized, send-ready emails in seconds using your profile data — skills, projects, and experience level.
