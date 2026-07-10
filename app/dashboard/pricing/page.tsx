@@ -3,11 +3,41 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import Script from "next/script";
 import { Loader2 } from "lucide-react";
 import { Separator } from "../../../components/ui/separator";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { PricingCard } from "../../../components/PricingCard";
 import { signOut } from "../../../lib/actions/auth";
+
+declare global {
+  interface Window {
+    Razorpay: new (options: RazorpayOptions) => RazorpayInstance;
+  }
+}
+
+interface RazorpayOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  handler: (response: RazorpayResponse) => void;
+  prefill: { name: string; email: string };
+  theme: { color: string };
+}
+
+interface RazorpayInstance {
+  open: () => void;
+  on: (event: string, handler: (response: { error: { description: string } }) => void) => void;
+}
+
+interface RazorpayResponse {
+  razorpay_order_id: string;
+  razorpay_payment_id: string;
+  razorpay_signature: string;
+}
 
 const plans = [
   {
@@ -77,6 +107,7 @@ export default function PricingPage() {
   const [tier, setTier] = useState("free");
   const [signingOut, setSigningOut] = useState(false);
   const [showComparison, setShowComparison] = useState(true);
+  const [purchasing, setPurchasing] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -102,11 +133,63 @@ export default function PricingPage() {
     router.push("/sign-in");
   };
 
+  const handleCheckout = async (plan: string) => {
+    setPurchasing(plan);
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.error || "Failed to create order");
+        setPurchasing(null);
+        return;
+      }
+
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "MailCraft",
+        description: `${plan.toUpperCase()} Plan`,
+        order_id: data.orderId,
+        handler: (response: RazorpayResponse) => {
+          console.log("Payment success:", response);
+          alert("Payment successful! Your plan will be activated shortly.");
+          setPurchasing(null);
+          window.location.reload();
+        },
+        prefill: {
+          name: data.userName || "",
+          email: data.userEmail || "",
+        },
+        theme: {
+          color: "#E8FF4D",
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on("payment.failed", (response: { error: { description: string } }) => {
+        alert(`Payment failed: ${response.error.description}`);
+        setPurchasing(null);
+      });
+      rzp.open();
+    } catch {
+      alert("Something went wrong. Try again.");
+      setPurchasing(null);
+    }
+  };
+
   const usagePercent = credits !== null ? Math.round((credits / maxCredits) * 100) : 0;
   const emailsUsed = credits !== null ? maxCredits - credits : 0;
 
   return (
     <div className="flex flex-col min-h-screen bg-[#0a0a0a] text-white font-mono">
+      <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="afterInteractive" />
       
       <div className="flex items-center justify-between px-4 py-3 md:px-8 border-b border-white/10 bg-[#111110]">
         <div className="flex items-center gap-3">
@@ -268,10 +351,15 @@ export default function PricingPage() {
                 price={plan.price}
                 period={plan.period}
                 features={plan.features}
-                buttonText={plan.buttonText}
+                buttonText={purchasing === plan.name.toLowerCase() ? "PROCESSING..." : plan.buttonText}
                 highlighted={plan.highlighted}
                 isCurrent={tier === plan.name.toLowerCase()}
                 badge={plan.badge}
+                onClick={
+                  plan.name.toLowerCase() === "free" || tier === plan.name.toLowerCase()
+                    ? undefined
+                    : () => handleCheckout(plan.name.toLowerCase())
+                }
               />
             ))}
           </div>
