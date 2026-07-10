@@ -54,15 +54,17 @@ export async function POST(req: NextRequest) {
   const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
 
   if (daysSinceReset >= 30) {
-    const newCredits = PLAN_CREDITS[profile.subscription_tier] || PLAN_CREDITS.free;
     await supabase
       .from("profiles")
       .update({
-        credits: newCredits,
+        subscription_tier: "free",
+        credits: 10,
         credits_reset_at: now.toISOString(),
+        subscription_status: "inactive",
       })
       .eq("id", user.id);
-    profile.credits = newCredits;
+    profile.subscription_tier = "free";
+    profile.credits = 10;
   }
 
  
