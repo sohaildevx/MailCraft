@@ -3,6 +3,7 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
+import { Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
@@ -39,6 +40,7 @@ export default function ProfilePage() {
   const [signingOut, setSigningOut] = useState(false);
   const [loading, setLoading] = useState(true);
   const [credits, setCredits] = useState<number | null>(null);
+  const [loadingCredits, setLoadingCredits] = useState(false);
   const pathname = usePathname();
 
   const loadProfile = useCallback(async () => {
@@ -155,13 +157,20 @@ export default function ProfilePage() {
               },
               {
                 label: credits === null ? "Loading..." : `${credits} credits`,
-                icon: (
+                icon: loadingCredits ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                     <circle cx="12" cy="12" r="8"/>
                     <path d="M12 8v8"/>
                     <path d="M8 12h8"/>
                   </svg>
                 ),
+                onClick: () => {
+                  setLoadingCredits(true);
+                  router.push("/dashboard/pricing");
+                },
+                closeOnClick: false,
               },
               { label: "separator" },
               {
