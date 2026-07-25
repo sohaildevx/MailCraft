@@ -261,7 +261,7 @@ export default function ProfilePage() {
                 value={profile.fullName}
                 onChange={(e) => updateField("fullName", e.target.value)}
                 placeholder="e.g. Shahid"
-                className="bg-[#f5f5f5] border-gray-300 text-black placeholder:text-gray-400 focus-visible:ring-[#65a30d] focus-visible:border-[#65a30d]"
+                className="bg-[#f5f5f5] border-gray-300 text-black placeholder:text-gray-400 focus-visible:ring-[#65a30d] focus-visible:border-[#65a30d] uppercase"
               />
             </div>
 
@@ -273,7 +273,7 @@ export default function ProfilePage() {
                 value={profile.jobTitle}
                 onChange={(e) => updateField("jobTitle", e.target.value)}
                 placeholder="e.g. Frontend Developer"
-                className="bg-[#f5f5f5] border-gray-300 text-black placeholder:text-gray-400 focus-visible:ring-[#65a30d] focus-visible:border-[#65a30d]"
+                className="bg-[#f5f5f5] border-gray-300 text-black placeholder:text-gray-400 focus-visible:ring-[#65a30d] focus-visible:border-[#65a30d] uppercase"
               />
             </div>
 

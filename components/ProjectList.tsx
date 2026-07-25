@@ -52,7 +52,7 @@ export function ProjectList({ projects, onChange }: ProjectListProps) {
             value={project.name}
             onChange={(e) => updateProject(i, "name", e.target.value)}
             placeholder="Project name"
-            className="bg-transparent text-sm font-medium text-black placeholder:text-gray-400 outline-none pr-6"
+            className="bg-transparent text-sm font-medium text-black placeholder:text-gray-400 outline-none pr-6 uppercase"
           />
           <textarea
             value={project.description}
