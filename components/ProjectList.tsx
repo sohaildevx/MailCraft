@@ -1,5 +1,7 @@
 "use client";
 
+import { useState } from "react";
+
 interface Project {
   name: string;
   description: string;
@@ -11,12 +13,17 @@ interface ProjectListProps {
 }
 
 export function ProjectList({ projects, onChange }: ProjectListProps) {
+  const [deleteIndex, setDeleteIndex] = useState<number | null>(null);
+
   const addProject = () => {
     onChange([...projects, { name: "", description: "" }]);
   };
 
-  const removeProject = (index: number) => {
-    onChange(projects.filter((_, i) => i !== index));
+  const confirmRemove = () => {
+    if (deleteIndex !== null) {
+      onChange(projects.filter((_, i) => i !== deleteIndex));
+      setDeleteIndex(null);
+    }
   };
 
   const updateProject = (index: number, field: keyof Project, value: string) => {
@@ -32,7 +39,7 @@ export function ProjectList({ projects, onChange }: ProjectListProps) {
         <div key={i} className="bg-[#f5f5f5] border border-gray-300 rounded-md p-3 flex flex-col gap-2 relative">
           <button
             type="button"
-            onClick={() => removeProject(i)}
+            onClick={() => setDeleteIndex(i)}
             className="absolute top-2 right-2 text-gray-400 hover:text-red-500 transition-colors cursor-pointer p-1"
           >
             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -47,12 +54,12 @@ export function ProjectList({ projects, onChange }: ProjectListProps) {
             placeholder="Project name"
             className="bg-transparent text-sm font-medium text-black placeholder:text-gray-400 outline-none pr-6"
           />
-          <input
-            type="text"
+          <textarea
             value={project.description}
             onChange={(e) => updateProject(i, "description", e.target.value)}
             placeholder="Short description"
-            className="bg-transparent text-xs text-gray-600 placeholder:text-gray-400 outline-none pr-6"
+            rows={3}
+            className="bg-transparent text-xs text-gray-600 placeholder:text-gray-400 outline-none pr-6 resize-none"
           />
         </div>
       ))}
@@ -68,6 +75,31 @@ export function ProjectList({ projects, onChange }: ProjectListProps) {
         </svg>
         ADD PROJECT
       </button>
+
+      {deleteIndex !== null && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-xl p-6 flex flex-col gap-4 max-w-sm w-full mx-4 shadow-xl">
+            <h3 className="text-sm font-bold text-black">Delete Project?</h3>
+            <p className="text-xs text-gray-500">
+              Are you sure you want to remove &quot;{projects[deleteIndex].name || "Untitled project"}&quot;? This action cannot be undone.
+            </p>
+            <div className="flex gap-3 justify-end">
+              <button
+                onClick={() => setDeleteIndex(null)}
+                className="px-4 py-2 text-xs font-medium text-gray-600 hover:bg-gray-100 rounded-lg transition-colors cursor-pointer"
+              >
+                CANCEL
+              </button>
+              <button
+                onClick={confirmRemove}
+                className="px-4 py-2 text-xs font-medium text-white bg-red-500 hover:bg-red-600 rounded-lg transition-colors cursor-pointer"
+              >
+                DELETE
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
