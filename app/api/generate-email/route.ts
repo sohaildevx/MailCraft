@@ -8,6 +8,9 @@ const PLAN_CREDITS: Record<string, number> = {
   team: 500,
 };
 
+
+const USAGE_LIMITS_ENABLED = false;
+
 function createClient(req: NextRequest) {
   return createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -49,26 +52,28 @@ export async function POST(req: NextRequest) {
   }
 
   
-  const lastReset = new Date(profile.credits_reset_at);
-  const now = new Date();
-  const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
+  if (USAGE_LIMITS_ENABLED) {
+    const lastReset = new Date(profile.credits_reset_at);
+    const now = new Date();
+    const daysSinceReset = Math.floor((now.getTime() - lastReset.getTime()) / (1000 * 60 * 60 * 24));
 
-  if (daysSinceReset >= 30) {
-    await supabase
-      .from("profiles")
-      .update({
-        subscription_tier: "free",
-        credits: 10,
-        credits_reset_at: now.toISOString(),
-        subscription_status: "inactive",
-      })
-      .eq("id", user.id);
-    profile.subscription_tier = "free";
-    profile.credits = 10;
+    if (daysSinceReset >= 30) {
+      await supabase
+        .from("profiles")
+        .update({
+          subscription_tier: "free",
+          credits: 10,
+          credits_reset_at: now.toISOString(),
+          subscription_status: "inactive",
+        })
+        .eq("id", user.id);
+      profile.subscription_tier = "free";
+      profile.credits = 10;
+    }
   }
 
- 
-  if (profile.credits <= 0) {
+  
+  if (USAGE_LIMITS_ENABLED && profile.credits <= 0) {
     return NextResponse.json(
       { error: "No credits left. Upgrade your plan to generate more emails." },
       { status: 403 }
@@ -166,25 +171,30 @@ ${additionalContext ? `Additional Context:\n${additionalContext}` : ""}`;
     }
 
    
-    const newCredits = profile.credits - 1;
-    await supabase
-      .from("profiles")
-      .update({ credits: newCredits })
-      .eq("id", user.id);
+    let creditsRemaining = profile.credits;
+    if (USAGE_LIMITS_ENABLED) {
+      const newCredits = profile.credits - 1;
+      await supabase
+        .from("profiles")
+        .update({ credits: newCredits })
+        .eq("id", user.id);
 
-    await supabase
-      .from("credit_history")
-      .insert({
-        user_id: user.id,
-        amount: -1,
-        type: "spend",
-        description: `Generated ${emailType} email for ${companyName}`,
-      });
+      await supabase
+        .from("credit_history")
+        .insert({
+          user_id: user.id,
+          amount: -1,
+          type: "spend",
+          description: `Generated ${emailType} email for ${companyName}`,
+        });
+
+      creditsRemaining = newCredits;
+    }
 
     return NextResponse.json({
       subject: parsed.subject || subjectLine || `${emailType}: ${whatApplyingFor} at ${companyName}`,
       body: parsed.body || "",
-      creditsRemaining: newCredits,
+      creditsRemaining,
     });
   } catch (error: unknown) {
     console.error("OpenAI error:", error);

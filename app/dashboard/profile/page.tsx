@@ -3,11 +3,9 @@
 import { useState, useMemo, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
-import { Loader2 } from "lucide-react";
 import { Button } from "../../../components/ui/button";
 import { Input } from "../../../components/ui/input";
 import { Label } from "../../../components/ui/label";
-import { Separator } from "../../../components/ui/separator";
 import { DropdownMenu } from "../../../components/DropdownMenu";
 import { TagInput } from "../../../components/TagInput";
 import { ProjectList } from "../../../components/ProjectList";
@@ -39,8 +37,6 @@ export default function ProfilePage() {
   const [saved, setSaved] = useState(false);
   const [signingOut, setSigningOut] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [credits, setCredits] = useState<number | null>(null);
-  const [loadingCredits, setLoadingCredits] = useState(false);
   const pathname = usePathname();
 
   const loadProfile = useCallback(async () => {
@@ -63,7 +59,6 @@ export default function ProfilePage() {
         };
         setProfile(loaded);
         setSavedProfile(loaded);
-        setCredits(data.credits ?? 10);
       }
     } catch {
       // fallback: profile stays empty
@@ -124,21 +119,6 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-xs">
-            {credits === null ? (
-              <span className="h-4 w-8 bg-gray-300 rounded animate-pulse" />
-            ) : (
-              <span className="text-[#65a30d] font-bold">{credits}</span>
-            )}
-            <span className="text-gray-400">credits</span>
-          </span>
-          <Link
-            href="/dashboard/pricing"
-            className="text-xs font-medium text-[#65a30d] hover:underline hidden sm:inline"
-          >
-            Buy credits
-          </Link>
-          <Separator orientation="vertical" className="h-4 bg-gray-200 hidden sm:block" />
           <DropdownMenu
             trigger={
               <div className="w-8 h-8 rounded-full bg-[#65a30d] flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity">
@@ -154,23 +134,6 @@ export default function ProfilePage() {
                     <circle cx="12" cy="7" r="4"/>
                   </svg>
                 ),
-              },
-              {
-                label: credits === null ? "Loading..." : `${credits} credits`,
-                icon: loadingCredits ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="8"/>
-                    <path d="M12 8v8"/>
-                    <path d="M8 12h8"/>
-                  </svg>
-                ),
-                onClick: () => {
-                  setLoadingCredits(true);
-                  router.push("/dashboard/pricing");
-                },
-                closeOnClick: false,
               },
               { label: "separator" },
               {

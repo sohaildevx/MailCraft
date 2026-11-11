@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Link from "next/link";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import { Button } from "../../components/ui/button";
@@ -63,23 +62,6 @@ const DashboardPage = () => {
   const [copiedAll, setCopiedAll] = useState(false);
   const [error, setError] = useState("");
   const [signingOut, setSigningOut] = useState(false);
-  const [credits, setCredits] = useState<number | null>(null);
-  const [loadingCredits, setLoadingCredits] = useState(false);
-
-  useEffect(() => {
-    const fetchCredits = async () => {
-      try {
-        const res = await fetch("/api/profile");
-        if (res.ok) {
-          const data = await res.json();
-          setCredits(data.credits ?? 10);
-        }
-      } catch {
-        setCredits(10);
-      }
-    };
-    fetchCredits();
-  }, []);
 
   const handleSignOut = async () => {
     setSigningOut(true);
@@ -111,9 +93,6 @@ const DashboardPage = () => {
 
       setGeneratedSubject(data.subject);
       setGeneratedBody(data.body);
-      if (data.creditsRemaining !== undefined) {
-        setCredits(data.creditsRemaining);
-      }
       setMobileTab("preview");
     } catch {
       setError("Failed to generate email. Try again.");
@@ -169,21 +148,6 @@ const DashboardPage = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          <span className="flex items-center gap-1.5 text-xs">
-            {credits === null ? (
-              <span className="h-4 w-8 bg-gray-300 rounded animate-pulse" />
-            ) : (
-              <span className="text-[#65a30d] font-bold">{credits}</span>
-            )}
-            <span className="text-gray-400">credits</span>
-          </span>
-          <Link
-            href="/dashboard/pricing"
-            className="text-xs font-medium text-[#65a30d] hover:underline hidden sm:inline"
-          >
-            Buy credits
-          </Link>
-          <Separator orientation="vertical" className="h-4 bg-gray-200 hidden sm:block" />
           <DropdownMenu
             trigger={
               <div className="w-8 h-8 rounded-full bg-[#65a30d] flex items-center justify-center text-white text-xs font-bold cursor-pointer hover:opacity-80 transition-opacity">
@@ -200,23 +164,6 @@ const DashboardPage = () => {
                   </svg>
                 ),
                 href: "/dashboard/profile",
-              },
-              {
-                label: credits === null ? "Loading..." : `${credits} credits`,
-                icon: loadingCredits ? (
-                  <Loader2 className="animate-spin" size={16} />
-                ) : (
-                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <circle cx="12" cy="12" r="8"/>
-                    <path d="M12 8v8"/>
-                    <path d="M8 12h8"/>
-                  </svg>
-                ),
-                onClick: () => {
-                  setLoadingCredits(true);
-                  router.push("/dashboard/pricing");
-                },
-                closeOnClick: false,
               },
               { label: "separator" },
               {
@@ -346,7 +293,7 @@ const DashboardPage = () => {
 
           <Button
             onClick={handleGenerate}
-            disabled={!form.companyName || !form.jobRole || !form.whatApplyingFor || generating || credits === null || (credits !== null && credits <= 0)}
+            disabled={!form.companyName || !form.jobRole || !form.whatApplyingFor || generating}
             className="w-full bg-black text-white font-bold hover:bg-[#E8FF4D] hover:text-black cursor-pointer disabled:opacity-50 transition-all duration-200"
           >
             {generating ? (
