@@ -114,7 +114,16 @@ export async function POST(req: NextRequest) {
   }
 
   const profileContext = profile
-    ? `\nUser Profile:\n- Name: ${profile.name || "Unknown"}\n- Job Title: ${profile.job_title || "Unknown"}\n- Experience Level: ${profile.experience_level || "Unknown"}\n- Tech Stack: ${profile.tech_stack || "Unknown"}\n- Projects: ${profile.projects || "None"}`
+    ? [
+        "\nUser Profile:",
+        `- Name: ${profile.name || "Unknown"}`,
+        `- Job Title: ${profile.job_title || "Unknown"}`,
+        `- Experience Level: ${profile.experience_level || "Unknown"}`,
+        `- Tech Stack: ${profile.tech_stack || "Unknown"}`,
+        `- Projects: ${profile.projects || "None"}`,
+        ...(profile.github_url ? [`- GitHub: ${profile.github_url}`] : []),
+        ...(profile.portfolio_url ? [`- Portfolio: ${profile.portfolio_url}`] : []),
+      ].join("\n")
     : "";
 
   const systemPrompt = `You are MailCraft, an expert AI email writer. Write a ${tone.toLowerCase()} ${emailType.toLowerCase()} email.
@@ -125,9 +134,13 @@ Rules:
 - Tone: ${tone}
 - Email type: ${emailType}
 - No markdown, no code fences, just raw JSON
+- The email body must be plain text only: no markdown link syntax, no asterisks, no hashtags. Write URLs as raw https:// links — email clients make them clickable automatically.
 - The body should be well-structured with proper paragraphs
 - Sign off professionally${profile?.name ? ` as ${profile.name}` : " (no name needed, the user will add it later)"}
-- IMPORTANT: Only mention technologies, skills, and tools that are explicitly listed in the user's tech stack. Do NOT assume or invent skills the user does not have. If the user has no tech stack provided, avoid mentioning specific technologies.
+- IMPORTANT — skill source: The ONLY technologies you may present as the user's skills are the ones in the profile's Tech Stack line. The Job Description describes the ROLE, never the candidate: if it mentions Django, React, AWS, PostgreSQL or anything else that is not in the Tech Stack line, do not claim it, do not imply it, and do not infer skills from adjacent ones (Python does not imply Django). Technologies from the Job Description may be acknowledged only as something the user wants to learn, never as experience.
+- IMPORTANT — stack coverage: The Tech Stack line may contain many technologies — read ALL of them before writing. Choose 2-4 that best fit THIS role (backend role → languages, databases, devops; frontend role → frontend frameworks) and weave them in specifically. Do not default to the first item on the list, and never let a single technology stand in for the whole stack.
+- If no tech stack is provided, avoid mentioning specific technologies.
+- Links: If a GitHub or portfolio URL is provided in the profile and is relevant to the role, include exactly ONE link, placed INSIDE a sentence that references a specific project or piece of work (e.g. "I built a course-scheduling API used by 400 students — https://github.com/x/y"). Never put the link in its own sentence or use phrases like "You can view my work at...". Prefer GitHub for technical/engineering roles and portfolio for design, writing, or creative roles. Never include both links. If no link is relevant to this role, include no links at all.
 - Keep the email concise (150-200 words). Be direct and impactful — cover key points (relevant skills, experience, value you bring) without fluff or filler sentences.
 ${profileContext}`;
 
@@ -138,6 +151,7 @@ Role: ${jobRole}
 ${hiringManager ? `Recipient: ${hiringManager}` : ""}
 Purpose: ${whatApplyingFor}
 ${jobDescription ? `Job Description:\n${jobDescription}` : ""}
+Candidate's actual skills — claim ONLY these: ${profile?.tech_stack || "not provided"}
 ${additionalContext ? `Additional Context:\n${additionalContext}` : ""}`;
 
   try {
