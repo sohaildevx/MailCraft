@@ -127,6 +127,24 @@ const DashboardPage = () => {
     setTimeout(() => setCopiedAll(false), 2000);
   };
 
+  const openCompose = (provider: "gmail" | "outlook" | "default") => {
+    const subject = encodeURIComponent(generatedSubject);
+    const body = encodeURIComponent(generatedBody);
+    if (provider === "gmail") {
+      window.open(
+        `https://mail.google.com/mail/?view=cm&fs=1&to=&su=${subject}&body=${body}`,
+        "_blank"
+      );
+    } else if (provider === "outlook") {
+      window.open(
+        `https://outlook.live.com/mail/0/deeplink/compose?to=&subject=${subject}&body=${body}`,
+        "_blank"
+      );
+    } else {
+      window.location.href = `mailto:?subject=${subject}&body=${body}`;
+    }
+  };
+
   const wordCount = generatedBody
     ? generatedBody.trim().split(/\s+/).length
     : 0;
@@ -322,11 +340,12 @@ const DashboardPage = () => {
 
        
         <div className={`flex-1 overflow-y-auto p-6 flex flex-col ${mobileTab === "preview" ? "flex" : "hidden md:flex"}`}>
-          <div className="flex items-center justify-between mb-6">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-6">
             <span className="text-xs tracking-widest text-gray-400">
               02 — GENERATED EMAIL
             </span>
             {generatedSubject && (
+              <div className="flex items-center gap-2">
               <Button
                 onClick={handleCopyAll}
                 variant="outline"
@@ -350,6 +369,26 @@ const DashboardPage = () => {
                   </span>
                 )}
               </Button>
+                <DropdownMenu
+                  trigger={
+                    <span className="inline-flex items-center gap-1.5 rounded-md border border-black bg-black px-3 py-1.5 text-xs font-medium text-white hover:bg-gray-800 cursor-pointer transition-all duration-200">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <line x1="22" y1="2" x2="11" y2="13" />
+                        <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                      </svg>
+                      SEND VIA EMAIL
+                      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <polyline points="6 9 12 15 18 9" />
+                      </svg>
+                    </span>
+                  }
+                  items={[
+                    { label: "Gmail", onClick: () => openCompose("gmail") },
+                    { label: "Outlook", onClick: () => openCompose("outlook") },
+                    { label: "Default mail app", onClick: () => openCompose("default") },
+                  ]}
+                />
+              </div>
             )}
           </div>
 
